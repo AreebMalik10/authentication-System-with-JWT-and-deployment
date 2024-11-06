@@ -26,7 +26,7 @@ export default function Login() {
       .then((res) => {
         alert(res.data.message);
         if (res.data.message === 'Login Successful') {
-          navigate('/home'); // Redirect to homepage on successful login
+          navigate('/'); // Redirect to homepage on successful login
         }
       })
       .catch((err) => {
