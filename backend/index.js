@@ -7,7 +7,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Connect to MongoDB
+
+
+
 async function connectDB() {
   try {
     await mongoose.connect('mongodb://127.0.0.1:27017/authsystem', {
@@ -19,65 +21,83 @@ async function connectDB() {
     console.error("DB connection error:", error);
   }
 }
+
+// Call the function to connect to the database
 connectDB();
 
 // User Schema
+ 
 const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String
-});
+    name:String,
+    email:String,
+    password:String
+})
 
-const User = mongoose.model("User", userSchema);
+const User = new mongoose.model("User",userSchema)
+
 
 // Routes
-
-// Login route
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  
-  // Corrected to use `User.findOne`
-  User.findOne({ email: email }, (err, user) => {
+
+  // Ensure email and password are received
+  if (!email || !password) {
+    console.log('Email or password missing');
+    return res.status(400).send({ message: "Email and password are required." });
+  }
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email: email });
+
     if (user) {
       if (password === user.password) {
-        res.send({ message: "Login Successful", user: user });
+        console.log("Login successful");
+        return res.status(200).send({ message: "Login Successful", user: user });
       } else {
-        res.send({ message: "Password didn't match" });
+        console.log("Password mismatch");
+        return res.status(400).send({ message: "Password didn't match" });
       }
     } else {
-      res.send({ message: "User not registered" });
+      console.log("User not found");
+      return res.status(404).send({ message: "User not registered" });
     }
-  });
+  } catch (err) {
+    console.error("Database error:", err);  // Add detailed logging
+    return res.status(500).send({ message: "Internal server error" });
+  }
 });
 
-// Register route
-app.post("/register", (req, res) => {
+
+
+
+
+
+app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-  
-  // Check if the user already exists
-  User.findOne({ email: email }, (err, existingUser) => {
+  console.log("Received registration data:", req.body);
+
+  try {
+    const existingUser = await User.findOne({ email: email });
+
     if (existingUser) {
-      return res.send({ message: "User already registered" });
+      return res.status(400).send({ message: "User already registered" });
     }
-    
-    // If user does not exist, create and save a new user
-    const newUser = new User({
-      name,
-      email,
-      password
-    });
-    
-    newUser.save(error => {
-      if (error) {
-        console.error("Error saving user:", error);
-        return res.send({ message: "Error saving user" });
-      } else {
-        return res.send({ message: "Successfully registered" });
-      }
-    });
-  });
+
+    const newUser = new User({ name, email, password });
+    await newUser.save(); 
+
+    return res.status(201).send({ message: "Successfully registered" });
+  } catch (err) {
+    console.error("Error during registration:", err);
+    return res.status(500).send({ message: "Error during registration", error: err.message });
+  }
 });
+
+
+
 
 app.listen(9002, () => {
   console.log("BE started at port 9002");
 });
+

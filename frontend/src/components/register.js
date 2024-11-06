@@ -22,23 +22,30 @@ export default function Register() {
     const register = () => {
         const { name, email, password, reEnterPassword } = user;
         if (name && email && password && password === reEnterPassword) {
-            axios.post("http://localhost:9002/register", user)
-                .then(res => {
-                    // Check if message exists in response data
-                    if (res.data.message) {
-                        alert(res.data.message); // Show the backend message
-                    } else {
-                        alert("Unexpected error, please try again."); // Fallback error
-                    }
-                })
-                .catch(err => {
-                    console.error(err); // Log error for debugging
-                    alert("Registration failed due to a network error or server issue.");
-                });
+          axios.post("http://localhost:9002/register", user)
+            .then(res => {
+              // Check if message exists in response data
+              if (res.data.message) {
+                alert(res.data.message); // Show the backend message
+              } else {
+                alert("Unexpected error, please try again."); // Fallback error
+              }
+            })
+            .catch(err => {
+              console.error("Error in registration:", err); // Log full error
+              if (err.response) {
+                console.error("Server Response:", err.response.data);
+                alert(`Registration failed: ${err.response.data.message || "Unknown error"}`);
+              } else {
+                alert("Registration failed due to a network error.");
+              }
+            });
         } else {
-            alert("Please fill all fields correctly.");
+          alert("Please fill all fields correctly.");
         }
-    }
+      }
+      
+    
 
     return (
         <div className='register'>
