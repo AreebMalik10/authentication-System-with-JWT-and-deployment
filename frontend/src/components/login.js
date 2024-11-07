@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './login.css';
-import { Link, useNavigate } from 'react-router-dom'; // useNavigate instead of useHistory
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function Login() {
@@ -8,8 +8,8 @@ export default function Login() {
     email: '',
     password: '',
   });
-
-  const navigate = useNavigate(); // Initialize useNavigate for redirect
+  const [loggedInUser, setLoggedInUser] = useState(null); // Store logged-in user info
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,13 +20,14 @@ export default function Login() {
   };
 
   const login = () => {
-    console.log("Login attempt with data:", user); // Log user data for debugging
     axios
       .post('http://localhost:9002/login', user)
       .then((res) => {
         alert(res.data.message);
         if (res.data.message === 'Login Successful') {
-          navigate('/'); // Redirect to homepage on successful login
+          setLoggedInUser(res.data.user); // Store user info
+          localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local storage
+          navigate('/'); // Navigate to homepage
         }
       })
       .catch((err) => {
@@ -34,8 +35,6 @@ export default function Login() {
         alert('Login failed. Please try again.');
       });
   };
-  
-  
 
   return (
     <div className='login'>
