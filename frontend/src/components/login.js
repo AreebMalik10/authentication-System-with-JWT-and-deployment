@@ -8,7 +8,6 @@ export default function Login() {
     email: '',
     password: '',
   });
-  const [loggedInUser, setLoggedInUser] = useState(null); // Store logged-in user info
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,9 +24,8 @@ export default function Login() {
       .then((res) => {
         alert(res.data.message);
         if (res.data.message === 'Login Successful') {
-          setLoggedInUser(res.data.user); // Store user info
-          localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local storage
-          navigate('/'); // Navigate to homepage
+          localStorage.setItem('token', res.data.token); // JWT token store ho raha hai
+          navigate('/'); // Homepage par redirect karte hain
         }
       })
       .catch((err) => {

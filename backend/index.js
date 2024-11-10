@@ -1,14 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
-
-
 
 async function connectDB() {
   try {
@@ -16,59 +13,58 @@ async function connectDB() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("DB connected");
+    console.log('DB connected');
   } catch (error) {
-    console.error("DB connection error:", error);
+    console.error('DB connection error:', error);
   }
 }
 
-// Call the function to connect to the database
 connectDB();
 
-// User Schema
- 
 const userSchema = new mongoose.Schema({
-    name:String,
-    email:String,
-    password:String
-})
+  name: String,
+  email: String,
+  password: String,
+});
 
-const User = new mongoose.model("User",userSchema)
+const User = mongoose.model('User', userSchema);
 
+const jwtSecret = 'yourSecretKey';
 
-// Routes
-app.post("/login", async (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
-  // Ensure email and password are received
-  if (!email || !password) {
-    console.log('Email or password missing');
-    return res.status(400).send({ message: "Email and password are required." });
-  }
+  if (!email || !password) return res.status(400).send({ message: 'Email and password are required.' });
 
   try {
-    // Find user by email
-    const user = await User.findOne({ email: email });
-
-    if (user) {
-      if (password === user.password) {
-        console.log("Login successful");
-        return res.status(200).send({ message: "Login Successful", user: user });
-      } else {
-        console.log("Password mismatch");
-        return res.status(400).send({ message: "Password didn't match" });
-      }
+    const user = await User.findOne({ email });
+    if (user && password === user.password) {
+      const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '10s' });
+      res.status(200).send({ message: 'Login Successful', token });
     } else {
-      console.log("User not found");
-      return res.status(404).send({ message: "User not registered" });
+      res.status(400).send({ message: 'Incorrect email or password' });
     }
   } catch (err) {
-    console.error("Database error:", err);  // Add detailed logging
-    return res.status(500).send({ message: "Internal server error" });
+    res.status(500).send({ message: 'Internal server error' });
   }
 });
 
+// New route to get user data by verifying token
+app.get('/getUser', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).send({ message: 'Unauthorized' });
 
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    const user = await User.findById(decoded.id);
+    if (user) {
+      res.status(200).send({ user });
+    } else {
+      res.status(404).send({ message: 'User not found' });
+    }
+  } catch (err) {
+    res.status(401).send({ message: 'Invalid or expired token' });
+  }
+});
 
 
 
