@@ -2,14 +2,19 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';  //  Import dotenv
+
+//  Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+//  Use environment variables
 async function connectDB() {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/authsystem', {
+    await mongoose.connect(process.env.DATABASE_URL, {  // Use DATABASE_URL from .env
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -29,7 +34,8 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-const jwtSecret = 'yourSecretKey';
+//  Use JWT secret from .env
+const jwtSecret = process.env.JWT_SECRET;
 
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -66,9 +72,6 @@ app.get('/getUser', async (req, res) => {
   }
 });
 
-
-
-
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   console.log("Received registration data:", req.body);
@@ -90,10 +93,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
-
-
-app.listen(9002, () => {
-  console.log("BE started at port 9002");
+app.listen(process.env.PORT || 9002, () => {  // Use PORT from .env, or default to 9002
+  console.log("BE started at port", process.env.PORT || 9002);
 });
-

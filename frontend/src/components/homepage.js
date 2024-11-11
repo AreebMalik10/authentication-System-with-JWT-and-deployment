@@ -12,7 +12,7 @@ export default function Homepage() {
     if (token) {
       try {
         const decoded = jwtDecode(token); // Token ko decode karrahe
-        const currentTime = Date.now() / 1000; // Ab ka waqt seconds mein
+        const currentTime = Date.now() / 1000; //  seconds mein
 
         // Agar token expire ho chuka hai
         if (decoded.exp < currentTime) {
@@ -33,7 +33,7 @@ export default function Homepage() {
               navigate('/login');
             });
 
-          // Token expiry time par auto logout ke liye timer set karen
+          // Token expiry time par auto logout ke liye timer set karengy
           const remainingTime = (decoded.exp - currentTime) * 1000; // Token expire hone mein kitna waqt reh gaya
           const logoutTimer = setTimeout(() => {
             alert('Session expired. Please Login.');
