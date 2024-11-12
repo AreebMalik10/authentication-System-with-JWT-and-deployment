@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';  //  Import dotenv
+import path from "path";
 
 //  Load environment variables from .env file
 dotenv.config();
@@ -10,6 +11,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+const _dirname = path.resolve();
+
 
 //  Use environment variables
 async function connectDB() {
@@ -92,6 +96,11 @@ app.post("/register", async (req, res) => {
     return res.status(500).send({ message: "Error during registration", error: err.message });
   }
 });
+
+app.use(express.static(path.join(_dirname, "/frontend/build")))
+app.get('*', (req, res)=>{
+  res.sendFile(path.resolve(_dirname, "frontend", "build", "index.html"))
+})
 
 app.listen(process.env.PORT || 9002, () => {  // Use PORT from .env, or default to 9002
   console.log("BE started at port", process.env.PORT || 9002);
