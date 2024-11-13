@@ -20,7 +20,7 @@ export default function Login() {
 
   const login = () => {
     axios
-      .post('http://localhost:9002/login', user)
+      .post('https://authentication-system-with-jwt-and.onrender.com/login', user)
       .then((res) => {
         alert(res.data.message);
         if (res.data.message === 'Login Successful') {

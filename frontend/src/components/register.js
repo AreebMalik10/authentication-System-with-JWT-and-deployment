@@ -22,7 +22,7 @@ export default function Register() {
     const register = () => {
         const { name, email, password, reEnterPassword } = user;
         if (name && email && password && password === reEnterPassword) {
-          axios.post("http://localhost:9002/register", user)
+          axios.post("https://authentication-system-with-jwt-and.onrender.com/register", user)
             .then(res => {
               // Check if message exists in response data
               if (res.data.message) {

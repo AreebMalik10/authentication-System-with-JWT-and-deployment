@@ -22,7 +22,7 @@ export default function Homepage() {
         } else {
           // Agar token abhi valid hai, to user data fetch karengy
           axios
-            .get('http://localhost:9002/getUser', {
+            .get('https://authentication-system-with-jwt-and.onrender.com/getUser', {
               headers: { Authorization: `Bearer ${token}` },
             })
             .then((res) => {
